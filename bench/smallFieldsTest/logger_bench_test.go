@@ -9,17 +9,21 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// --- Custom logger benchmark ---
 func BenchmarkCustomLogger(b *testing.B) {
 	l := logger.NewLogger(logger.DEBUG, io.Discard, false, false)
 
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		l.Info("Benchmarking custom logger", "i", i, "ok", true, "f", 3.1415)
-	}
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			l.Info("Benchmarking custom logger",
+				"i", 42,
+				"ok", true,
+				"f", 3.1415,
+			)
+		}
+	})
 }
 
-// --- Zap logger benchmark ---
 func BenchmarkZapLogger(b *testing.B) {
 	encoderCfg := zapcore.EncoderConfig{
 		TimeKey:        "T",
@@ -36,18 +40,20 @@ func BenchmarkZapLogger(b *testing.B) {
 	}
 
 	core := zapcore.NewCore(
-		zapcore.NewConsoleEncoder(encoderCfg),
+		zapcore.NewJSONEncoder(encoderCfg),
 		zapcore.AddSync(io.Discard),
 		zap.DebugLevel,
 	)
 	l := zap.New(core)
 
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		l.Info("Benchmarking zap logger",
-			zap.Int("i", i),
-			zap.Bool("ok", true),
-			zap.Float64("f", 3.1415),
-		)
-	}
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			l.Info("Benchmarking zap logger",
+				zap.Int("i", 42),
+				zap.Bool("ok", true),
+				zap.Float64("f", 3.1415),
+			)
+		}
+	})
 }

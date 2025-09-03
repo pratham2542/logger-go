@@ -13,15 +13,17 @@ import (
 func BenchmarkCustomLogger70Fields(b *testing.B) {
 	l := logger.NewLogger(logger.DEBUG, io.Discard, false, false)
 
-	fields := make([]interface{}, 0, 140)
+	fields := make([]any, 0, 140)
 	for i := 0; i < 70; i++ {
 		fields = append(fields, fmt.Sprintf("k%d", i), i)
 	}
 
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		l.Info("Benchmarking 70 fields", fields...)
-	}
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			l.Info("Benchmarking 70 fields", fields...)
+		}
+	})
 }
 
 func BenchmarkZapLogger70Fields(b *testing.B) {
@@ -40,7 +42,7 @@ func BenchmarkZapLogger70Fields(b *testing.B) {
 	}
 
 	core := zapcore.NewCore(
-		zapcore.NewConsoleEncoder(encoderCfg),
+		zapcore.NewJSONEncoder(encoderCfg),
 		zapcore.AddSync(io.Discard),
 		zap.DebugLevel,
 	)
@@ -52,7 +54,9 @@ func BenchmarkZapLogger70Fields(b *testing.B) {
 	}
 
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		l.Info("Benchmarking 70 fields", fields...)
-	}
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			l.Info("Benchmarking 70 fields", fields...)
+		}
+	})
 }
