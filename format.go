@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"path"
 	"runtime"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -38,8 +38,7 @@ func (l *Logger) log(level LogLevel, msg string, args ...interface{}) {
 	if l.fullPath {
 		buf.WriteString(file)
 	} else {
-		fileParts := strings.Split(file, "/")
-		buf.WriteString(fileParts[len(fileParts)-1])
+		buf.WriteString(path.Base(file))
 	}
 
 	buf.WriteString(":")
