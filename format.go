@@ -6,6 +6,7 @@ import (
 	"os"
 	"runtime"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -34,7 +35,13 @@ func (l *Logger) log(level LogLevel, msg string, args ...interface{}) {
 		line = 0
 	}
 
-	buf.WriteString(file)
+	if l.fullPath {
+		buf.WriteString(file)
+	} else {
+		fileParts := strings.Split(file, "/")
+		buf.WriteString(fileParts[len(fileParts)-1])
+	}
+
 	buf.WriteString(":")
 	buf.WriteString(strconv.Itoa(line))
 	buf.WriteString("] ")

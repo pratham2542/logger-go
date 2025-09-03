@@ -8,7 +8,7 @@ import (
 
 func main() {
 	// Console logger
-	logger := logger.NewLogger(logger.DEBUG, os.Stdout)
+	logger := logger.NewLogger(logger.DEBUG, os.Stdout, true)
 	logger.Info("Starting application")
 	logger.Debug("Debug value:", 42)
 }

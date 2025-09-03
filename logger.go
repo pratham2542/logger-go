@@ -9,17 +9,19 @@ import (
 
 type Logger struct {
 	minLevel LogLevel
+	fullPath bool
 	out      io.Writer
 	bufPool  sync.Pool
 }
 
 // Synchronous logger
-func NewLogger(level LogLevel, out io.Writer) *Logger {
+func NewLogger(level LogLevel, out io.Writer, fullPath bool) *Logger {
 	if out == nil {
 		out = os.Stdout
 	}
 	return &Logger{
 		minLevel: level,
+		fullPath: fullPath,
 		out:      &lockedWriter{w: out}, // lockeedWrite will make sure that no writes are getting intertwined
 		bufPool: sync.Pool{
 			New: func() interface{} {
