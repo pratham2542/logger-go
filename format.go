@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"encoding"
 	"fmt"
 	"os"
 	"path"
@@ -85,6 +86,16 @@ func writeArgs(buf *fastBuffer, msg string, args ...any) {
 			buf.b = strconv.AppendBool(buf.b, v)
 		case error:
 			buf.WriteString(v.Error())
+
+		// added custome types to use its own String or toString method before defaulting to fmt for string conversion
+		case fmt.Stringer:
+			buf.WriteString(v.String())
+		case encoding.TextMarshaler:
+			if b, err := v.MarshalText(); err == nil {
+				buf.b = append(buf.b, b...)
+			} else {
+				buf.WriteString(fmt.Sprint(v)) // fallback if MarshalText fails
+			}
 
 		default:
 			// fallback – only here we call fmt, rarely
