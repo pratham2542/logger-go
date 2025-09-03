@@ -11,7 +11,7 @@ import (
 
 // --- Custom logger benchmark ---
 func BenchmarkCustomLogger(b *testing.B) {
-	l := logger.NewLogger(logger.DEBUG, io.Discard, false)
+	l := logger.NewLogger(logger.DEBUG, io.Discard, false, false)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

@@ -11,7 +11,7 @@ import (
 )
 
 func BenchmarkCustomLogger70Fields(b *testing.B) {
-	l := logger.NewLogger(logger.DEBUG, io.Discard, false)
+	l := logger.NewLogger(logger.DEBUG, io.Discard, false, false)
 
 	fields := make([]interface{}, 0, 140)
 	for i := 0; i < 70; i++ {

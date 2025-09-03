@@ -47,7 +47,7 @@ func (l *Logger) log(level LogLevel, msg string, args ...any) {
 		}
 
 		buf.WriteString(":")
-		buf.WriteString(strconv.Itoa(line))
+		buf.b = strconv.AppendInt(buf.b, int64(line), 10)
 		buf.WriteString("] ")
 	}
 
