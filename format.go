@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"path"
@@ -15,8 +14,8 @@ func (l *Logger) log(level LogLevel, msg string, args ...interface{}) {
 		return
 	}
 
-	buf := l.bufPool.Get().(*bytes.Buffer) // Type assertion will always succeed so no check required
-	buf.Reset()                            // clears any old data in the buffer pool
+	buf := l.bufPool.Get().(*fastBuffer) // Type assertion will always succeed so no check required
+	buf.Reset()                          // clears any old data in the buffer pool
 
 	// Timestamp
 	timestamp := time.Now().Format("2006-01-02 15:04:05.000")
@@ -64,7 +63,7 @@ func (l *Logger) Fatal(msg string, args ...interface{}) {
 	os.Exit(1)
 }
 
-func writeArgs(buf *bytes.Buffer, msg string, args ...interface{}) {
+func writeArgs(buf *fastBuffer, msg string, args ...interface{}) {
 	buf.WriteString(msg)
 	for _, arg := range args {
 		buf.WriteByte(' ')

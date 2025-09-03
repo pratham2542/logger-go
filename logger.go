@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"bytes"
 	"io"
 	"os"
 	"sync"
@@ -27,7 +26,10 @@ func NewLogger(level LogLevel, out io.Writer, fullPath bool) *Logger {
 			New: func() interface{} {
 				// This is the only buffer creation
 				// After this initialization logger will reuse it again and again
-				return new(bytes.Buffer) // create a new buffer in pool
+				return &fastBuffer{ // create a new buffer in pool
+					b: make([]byte, 0, 1024), // create a fixed sized byte array so no realloaction happens
+					// change it to ~4 KB if the log formate changes to json
+				}
 			},
 		},
 	}
