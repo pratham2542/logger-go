@@ -7,7 +7,6 @@ import (
 	"path"
 	"runtime"
 	"strconv"
-	"time"
 )
 
 func (l *Logger) log(level LogLevel, msg string, args ...any) {
@@ -19,31 +18,38 @@ func (l *Logger) log(level LogLevel, msg string, args ...any) {
 	buf.Reset()                          // clears any old data in the buffer pool
 
 	// Timestamp
-	timestamp := time.Now().Format("2006-01-02 15:04:05.000")
-	buf.WriteString("[")
-	buf.WriteString(timestamp)
-	buf.WriteString("] [")
+	buf.Write(l.tsCache.Bytes())
+	buf.WriteString(" [")
 
 	// Level
 	buf.WriteString(levelNames[level])
-	buf.WriteString("] [")
-
-	// Caller
-	_, file, line, ok := runtime.Caller(2)
-	if !ok {
-		file = "???"
-		line = 0
-	}
-
-	if l.fullPath {
-		buf.WriteString(file)
-	} else {
-		buf.WriteString(path.Base(file))
-	}
-
-	buf.WriteString(":")
-	buf.WriteString(strconv.Itoa(line))
 	buf.WriteString("] ")
+
+	if l.withCaller {
+		_, file, line, ok := runtime.Caller(2)
+		if !ok {
+			file = "???"
+			line = 0
+		}
+		buf.WriteString("[")
+
+		if l.fullPath {
+			buf.WriteString(file)
+		} else {
+			// Load from the cache to reduce finding the base filename
+			if val, ok := l.fileCache.Load(file); ok {
+				buf.WriteString(val.(string))
+			} else {
+				base := path.Base(file)
+				l.fileCache.Store(file, base)
+				buf.WriteString(base)
+			}
+		}
+
+		buf.WriteString(":")
+		buf.WriteString(strconv.Itoa(line))
+		buf.WriteString("] ")
+	}
 
 	writeArgs(buf, msg, args...)
 

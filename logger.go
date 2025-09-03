@@ -7,21 +7,25 @@ import (
 )
 
 type Logger struct {
-	minLevel LogLevel
-	fullPath bool
-	out      io.Writer
-	bufPool  sync.Pool
+	minLevel   LogLevel
+	fullPath   bool
+	withCaller bool
+	out        io.Writer
+	bufPool    sync.Pool
+	tsCache    *timestampCache
+	fileCache  sync.Map // cache for base filenames
 }
 
 // Synchronous logger
-func NewLogger(level LogLevel, out io.Writer, fullPath bool) *Logger {
+func NewLogger(level LogLevel, out io.Writer, fullPath, withCaller bool) *Logger {
 	if out == nil {
 		out = os.Stdout
 	}
 	return &Logger{
-		minLevel: level,
-		fullPath: fullPath,
-		out:      &lockedWriter{w: out}, // lockeedWrite will make sure that no writes are getting intertwined
+		minLevel:   level,
+		fullPath:   fullPath,
+		withCaller: withCaller,
+		out:        &lockedWriter{w: out}, // lockeedWrite will make sure that no writes are getting intertwined
 		bufPool: sync.Pool{
 			New: func() any {
 				// This is the only buffer creation
@@ -32,5 +36,7 @@ func NewLogger(level LogLevel, out io.Writer, fullPath bool) *Logger {
 				}
 			},
 		},
+		tsCache:   newTimestampCache(),
+		fileCache: sync.Map{},
 	}
 }
