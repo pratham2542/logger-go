@@ -1,5 +1,7 @@
 package logger
 
+import "sync"
+
 type fastBuffer struct {
 	b []byte
 }
@@ -25,4 +27,14 @@ func (fb *fastBuffer) WriteString(s string) (int, error) {
 func (fb *fastBuffer) WriteByte(c byte) error {
 	fb.b = append(fb.b, c)
 	return nil
+}
+
+// trim before put if the buffer grows beyond a limit (64 KB)
+func (fb *fastBuffer) TrimAndPut(pool *sync.Pool) {
+	if cap(fb.b) > 64*1024 { // >64KB, too big
+		pool.Put(&fastBuffer{b: make([]byte, 0, 1024)}) // replaced current buffer with fresh small buffer
+	} else {
+		fb.Reset()
+		pool.Put(fb)
+	}
 }

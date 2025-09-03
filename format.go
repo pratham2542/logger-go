@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func (l *Logger) log(level LogLevel, msg string, args ...interface{}) {
+func (l *Logger) log(level LogLevel, msg string, args ...any) {
 	if level < l.minLevel {
 		return
 	}
@@ -47,23 +47,22 @@ func (l *Logger) log(level LogLevel, msg string, args ...interface{}) {
 	writeArgs(buf, msg, args...)
 
 	buf.WriteByte('\n')
-
 	l.out.Write(buf.Bytes())
 
-	l.bufPool.Put(buf) // return the buffer to the pool for next time use
+	buf.TrimAndPut(&l.bufPool) // return the buffer to the pool for next time use (Trimed for larger buffer)
 }
 
 // Public API
-func (l *Logger) Debug(msg string, args ...interface{}) { l.log(DEBUG, msg, args...) }
-func (l *Logger) Info(msg string, args ...interface{})  { l.log(INFO, msg, args...) }
-func (l *Logger) Warn(msg string, args ...interface{})  { l.log(WARN, msg, args...) }
-func (l *Logger) Error(msg string, args ...interface{}) { l.log(ERROR, msg, args...) }
-func (l *Logger) Fatal(msg string, args ...interface{}) {
+func (l *Logger) Debug(msg string, args ...any) { l.log(DEBUG, msg, args...) }
+func (l *Logger) Info(msg string, args ...any)  { l.log(INFO, msg, args...) }
+func (l *Logger) Warn(msg string, args ...any)  { l.log(WARN, msg, args...) }
+func (l *Logger) Error(msg string, args ...any) { l.log(ERROR, msg, args...) }
+func (l *Logger) Fatal(msg string, args ...any) {
 	l.log(FATAL, msg, args...)
 	os.Exit(1)
 }
 
-func writeArgs(buf *fastBuffer, msg string, args ...interface{}) {
+func writeArgs(buf *fastBuffer, msg string, args ...any) {
 	buf.WriteString(msg)
 	for _, arg := range args {
 		buf.WriteByte(' ')

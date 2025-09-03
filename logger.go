@@ -23,7 +23,7 @@ func NewLogger(level LogLevel, out io.Writer, fullPath bool) *Logger {
 		fullPath: fullPath,
 		out:      &lockedWriter{w: out}, // lockeedWrite will make sure that no writes are getting intertwined
 		bufPool: sync.Pool{
-			New: func() interface{} {
+			New: func() any {
 				// This is the only buffer creation
 				// After this initialization logger will reuse it again and again
 				return &fastBuffer{ // create a new buffer in pool
