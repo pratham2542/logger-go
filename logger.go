@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"bytes"
 	"io"
 	"os"
 	"sync"
@@ -21,7 +22,11 @@ func NewLogger(level LogLevel, out io.Writer) *Logger {
 		minLevel: level,
 		out:      out,
 		bufPool: sync.Pool{
-			New: func() interface{} { return nil },
+			New: func() interface{} {
+				// This is the only buffer creation
+				// After this initialization logger will reuse it again and again
+				return new(bytes.Buffer) // create a new buffer in pool
+			},
 		},
 	}
 }
