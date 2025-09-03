@@ -20,7 +20,7 @@ func NewLogger(level LogLevel, out io.Writer) *Logger {
 	}
 	return &Logger{
 		minLevel: level,
-		out:      out,
+		out:      &lockedWriter{w: out}, // lockeedWrite will make sure that no writes are getting intertwined
 		bufPool: sync.Pool{
 			New: func() interface{} {
 				// This is the only buffer creation
