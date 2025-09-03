@@ -70,21 +70,22 @@ func writeArgs(buf *fastBuffer, msg string, args ...any) {
 		case string:
 			buf.WriteString(v)
 		case int:
-			buf.WriteString(strconv.Itoa(v))
+			buf.b = strconv.AppendInt(buf.b, int64(v), 10)
 		case int64:
-			buf.WriteString(strconv.FormatInt(v, 10))
+			buf.b = strconv.AppendInt(buf.b, v, 10)
 		case uint:
-			buf.WriteString(strconv.FormatUint(uint64(v), 10))
+			buf.b = strconv.AppendUint(buf.b, uint64(v), 10)
 		case uint64:
-			buf.WriteString(strconv.FormatUint(v, 10))
+			buf.b = strconv.AppendUint(buf.b, v, 10)
 		case float32:
-			buf.WriteString(strconv.FormatFloat(float64(v), 'f', -1, 32))
+			buf.b = strconv.AppendFloat(buf.b, float64(v), 'f', -1, 32)
 		case float64:
-			buf.WriteString(strconv.FormatFloat(v, 'f', -1, 64))
+			buf.b = strconv.AppendFloat(buf.b, v, 'f', -1, 64)
 		case bool:
-			buf.WriteString(strconv.FormatBool(v))
+			buf.b = strconv.AppendBool(buf.b, v)
 		case error:
 			buf.WriteString(v.Error())
+
 		default:
 			// fallback – only here we call fmt, rarely
 			buf.WriteString(fmt.Sprint(v))
