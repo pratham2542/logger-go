@@ -14,7 +14,8 @@ func (l *Logger) log(level LogLevel, msg string, args ...interface{}) {
 		return
 	}
 
-	buf := new(bytes.Buffer)
+	buf := l.bufPool.Get().(*bytes.Buffer) // Type assertion will always succeed so no check required
+	buf.Reset()                            // clears any old data in the buffer pool
 
 	// Timestamp
 	timestamp := time.Now().Format("2006-01-02 15:04:05.000")
@@ -42,11 +43,9 @@ func (l *Logger) log(level LogLevel, msg string, args ...interface{}) {
 
 	buf.WriteByte('\n')
 
-	data := buf.Bytes()
+	l.out.Write(buf.Bytes())
 
-	// sync mode
-	l.out.Write(data)
-
+	l.bufPool.Put(buf) // return the buffer to the pool for next time use
 }
 
 // Public API
