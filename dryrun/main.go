@@ -8,11 +8,11 @@ import (
 )
 
 func main() {
-	logger := logger.NewLogger(logger.DEBUG, os.Stdout, true, true)
+	l := logger.NewLogger(logger.DEBUG, os.Stdout, false, false)
 	i := 0
 	for {
-		logger.Info("logger loop started")
-		logger.Debug("Debug value:", i)
+		l.Info("logger loop started")
+		l.Debug("", logger.Int("Debug value", i))
 		i++
 		time.Sleep(1000 * time.Millisecond)
 	}

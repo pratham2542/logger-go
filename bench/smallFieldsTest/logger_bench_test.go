@@ -16,9 +16,9 @@ func BenchmarkCustomLogger(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			l.Info("Benchmarking custom logger",
-				"i", 42,
-				"ok", true,
-				"f", 3.1415,
+				logger.Int("i", 42),
+				logger.Bool("ok", true),
+				logger.Float("f", 3.1415),
 			)
 		}
 	})

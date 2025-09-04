@@ -13,9 +13,9 @@ import (
 func BenchmarkCustomLogger70Fields(b *testing.B) {
 	l := logger.NewLogger(logger.DEBUG, io.Discard, false, false)
 
-	fields := make([]any, 0, 140)
+	fields := make([]logger.Field, 0, 140)
 	for i := 0; i < 70; i++ {
-		fields = append(fields, fmt.Sprintf("k%d", i), i)
+		fields = append(fields, logger.Int(fmt.Sprintf("k%d", i), i))
 	}
 
 	b.ResetTimer()

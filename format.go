@@ -72,7 +72,7 @@ func writeFields(buf *fastBuffer, msg string, fields []Field) {
 	for _, f := range fields {
 		buf.WriteByte(' ')
 		buf.WriteString(f.Key)
-		buf.WriteByte('=')
+		buf.WriteString(": ")
 		switch f.Type {
 		case StringType:
 			buf.WriteString(f.Str)
