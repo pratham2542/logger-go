@@ -1,15 +1,13 @@
 package logger
 
 import (
-	"encoding"
-	"fmt"
 	"os"
 	"path"
 	"runtime"
 	"strconv"
 )
 
-func (l *Logger) log(level LogLevel, msg string, args ...any) {
+func (l *Logger) log(level LogLevel, msg string, fields ...Field) {
 	if level < l.minLevel {
 		return
 	}
@@ -51,7 +49,7 @@ func (l *Logger) log(level LogLevel, msg string, args ...any) {
 		buf.WriteString("] ")
 	}
 
-	writeArgs(buf, msg, args...)
+	writeFields(buf, msg, fields)
 
 	buf.WriteByte('\n')
 	l.out.Write(buf.Bytes())
@@ -60,52 +58,77 @@ func (l *Logger) log(level LogLevel, msg string, args ...any) {
 }
 
 // Public API
-func (l *Logger) Debug(msg string, args ...any) { l.log(DEBUG, msg, args...) }
-func (l *Logger) Info(msg string, args ...any)  { l.log(INFO, msg, args...) }
-func (l *Logger) Warn(msg string, args ...any)  { l.log(WARN, msg, args...) }
-func (l *Logger) Error(msg string, args ...any) { l.log(ERROR, msg, args...) }
-func (l *Logger) Fatal(msg string, args ...any) {
-	l.log(FATAL, msg, args...)
+func (l *Logger) Debug(msg string, fields ...Field) { l.log(DEBUG, msg, fields...) }
+func (l *Logger) Info(msg string, fields ...Field)  { l.log(INFO, msg, fields...) }
+func (l *Logger) Warn(msg string, fields ...Field)  { l.log(WARN, msg, fields...) }
+func (l *Logger) Error(msg string, fields ...Field) { l.log(ERROR, msg, fields...) }
+func (l *Logger) Fatal(msg string, fields ...Field) {
+	l.log(FATAL, msg, fields...)
 	os.Exit(1)
 }
 
-func writeArgs(buf *fastBuffer, msg string, args ...any) {
+func writeFields(buf *fastBuffer, msg string, fields []Field) {
 	buf.WriteString(msg)
-	for _, arg := range args {
+	for _, f := range fields {
 		buf.WriteByte(' ')
-		switch v := arg.(type) {
-		case string:
-			buf.WriteString(v)
-		case int:
-			buf.b = strconv.AppendInt(buf.b, int64(v), 10)
-		case int64:
-			buf.b = strconv.AppendInt(buf.b, v, 10)
-		case uint:
-			buf.b = strconv.AppendUint(buf.b, uint64(v), 10)
-		case uint64:
-			buf.b = strconv.AppendUint(buf.b, v, 10)
-		case float32:
-			buf.b = strconv.AppendFloat(buf.b, float64(v), 'f', -1, 32)
-		case float64:
-			buf.b = strconv.AppendFloat(buf.b, v, 'f', -1, 64)
-		case bool:
-			buf.b = strconv.AppendBool(buf.b, v)
-		case error:
-			buf.WriteString(v.Error())
-
-		// added custome types to use its own String or toString method before defaulting to fmt for string conversion
-		case fmt.Stringer:
-			buf.WriteString(v.String())
-		case encoding.TextMarshaler:
-			if b, err := v.MarshalText(); err == nil {
-				buf.b = append(buf.b, b...)
+		buf.WriteString(f.Key)
+		buf.WriteByte('=')
+		switch f.Type {
+		case StringType:
+			buf.WriteString(f.Str)
+		case IntType:
+			buf.b = strconv.AppendInt(buf.b, f.Int, 10)
+		case FloatType:
+			buf.b = strconv.AppendFloat(buf.b, f.Float, 'f', -1, 64)
+		case BoolType:
+			buf.b = strconv.AppendBool(buf.b, f.Bool)
+		case ErrorType:
+			if f.Err != nil {
+				buf.WriteString(f.Err.Error())
 			} else {
-				buf.WriteString(fmt.Sprint(v)) // fallback if MarshalText fails
+				buf.WriteString("nil")
 			}
-
-		default:
-			// fallback – only here we call fmt, rarely
-			buf.WriteString(fmt.Sprint(v))
 		}
 	}
 }
+
+// func writeArgs(buf *fastBuffer, msg string, fields ...Field) {
+// 	buf.WriteString(msg)
+// 	for _, arg := range args {
+// 		buf.WriteByte(' ')
+// 		switch v := arg.(type) {
+// 		case string:
+// 			buf.WriteString(v)
+// 		case int:
+// 			buf.b = strconv.AppendInt(buf.b, int64(v), 10)
+// 		case int64:
+// 			buf.b = strconv.AppendInt(buf.b, v, 10)
+// 		case uint:
+// 			buf.b = strconv.AppendUint(buf.b, uint64(v), 10)
+// 		case uint64:
+// 			buf.b = strconv.AppendUint(buf.b, v, 10)
+// 		case float32:
+// 			buf.b = strconv.AppendFloat(buf.b, float64(v), 'f', -1, 32)
+// 		case float64:
+// 			buf.b = strconv.AppendFloat(buf.b, v, 'f', -1, 64)
+// 		case bool:
+// 			buf.b = strconv.AppendBool(buf.b, v)
+// 		case error:
+// 			buf.WriteString(v.Error())
+
+// 		// added custome types to use its own String or toString method before defaulting to fmt for string conversion
+// 		case fmt.Stringer:
+// 			buf.WriteString(v.String())
+// 		case encoding.TextMarshaler:
+// 			if b, err := v.MarshalText(); err == nil {
+// 				buf.b = append(buf.b, b...)
+// 			} else {
+// 				buf.WriteString(fmt.Sprint(v)) // fallback if MarshalText fails
+// 			}
+
+// 		default:
+// 			// fallback – only here we call fmt, rarely
+// 			buf.WriteString(fmt.Sprint(v))
+// 		}
+// 	}
+// }
