@@ -10,16 +10,19 @@ import (
 )
 
 func BenchmarkCustomLogger(b *testing.B) {
-	l := logger.NewLogger(logger.DEBUG, io.Discard, false, false)
+	engine := logger.NewEngine(logger.DEBUG, logger.DefaultTextEncoder(), io.Discard)
+	l := logger.NewLogger(engine)
 
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			l.Info("Benchmarking custom logger",
-				logger.Int("i", 42),
-				logger.Bool("ok", true),
-				logger.Float("f", 3.1415),
-			)
+			for range 100 {
+				l.Info("Benchmarking custom logger",
+					logger.Int("i", 42),
+					logger.Bool("ok", true),
+					logger.Float("f", 3.1415),
+				)
+			}
 		}
 	})
 }
@@ -49,11 +52,13 @@ func BenchmarkZapLogger(b *testing.B) {
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			l.Info("Benchmarking zap logger",
-				zap.Int("i", 42),
-				zap.Bool("ok", true),
-				zap.Float64("f", 3.1415),
-			)
+			for range 100 {
+				l.Info("Benchmarking zap logger",
+					zap.Int("i", 42),
+					zap.Bool("ok", true),
+					zap.Float64("f", 3.1415),
+				)
+			}
 		}
 	})
 }

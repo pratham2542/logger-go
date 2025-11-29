@@ -11,17 +11,20 @@ import (
 )
 
 func BenchmarkCustomLogger70Fields(b *testing.B) {
-	l := logger.NewLogger(logger.DEBUG, io.Discard, false, false)
+	engine := logger.NewEngine(logger.DEBUG, logger.DefaultTextEncoder(), io.Discard)
+	l := logger.NewLogger(engine)
 
-	fields := make([]logger.Field, 0, 140)
-	for i := 0; i < 700000; i++ {
+	fields := make([]logger.Field, 0, 70000)
+	for i := 0; i < 70000; i++ {
 		fields = append(fields, logger.Int(fmt.Sprintf("k%d", i), i))
 	}
 
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			l.Info("Benchmarking 70 fields", fields...)
+			for range 10 {
+				l.Info("Benchmarking 70 fields", fields...)
+			}
 		}
 	})
 }
@@ -48,15 +51,17 @@ func BenchmarkZapLogger70Fields(b *testing.B) {
 	)
 	l := zap.New(core)
 
-	fields := make([]zap.Field, 0, 70)
-	for i := 0; i < 700000; i++ {
+	fields := make([]zap.Field, 0, 70000)
+	for i := 0; i < 70000; i++ {
 		fields = append(fields, zap.Int(fmt.Sprintf("k%d", i), i))
 	}
 
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			l.Info("Benchmarking 70 fields", fields...)
+			for range 10 {
+				l.Info("Benchmarking 70 fields", fields...)
+			}
 		}
 	})
 }

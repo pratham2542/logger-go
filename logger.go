@@ -2,31 +2,29 @@ package logger
 
 import (
 	"io"
-	"os"
 	"sync"
 )
 
 type Logger struct {
-	minLevel   LogLevel
+	engine     *Engine
 	fullPath   bool
 	withCaller bool
+	callerSkip int
 	out        io.Writer
 	bufPool    sync.Pool
 	tsCache    *timestampCache
 	fileCache  sync.Map // cache for base filenames
-	encoder    Encoder
 }
 
 // Synchronous logger
-func NewLogger(level LogLevel, out io.Writer, fullPath, withCaller bool) *Logger {
-	if out == nil {
-		out = os.Stdout
+func NewLogger(engine *Engine) *Logger {
+	if engine == nil {
+		engine = DefaultEngine()
 	}
 	return &Logger{
-		minLevel:   level,
-		fullPath:   fullPath,
-		withCaller: withCaller,
-		out:        &lockedWriter{w: out}, // lockedWriter will make sure that no writes are getting intertwined
+		engine:     engine,
+		withCaller: false,
+		out:        &lockedWriter{w: engine.out}, // lockedWriter will make sure that no writes are getting intertwined
 		bufPool: sync.Pool{
 			New: func() any {
 				// This is the only buffer creation
@@ -37,8 +35,9 @@ func NewLogger(level LogLevel, out io.Writer, fullPath, withCaller bool) *Logger
 				}
 			},
 		},
-		tsCache:   newTimestampCache(),
-		fileCache: sync.Map{},
-		encoder:   defaultTextEncoder(),
+		tsCache:    newTimestampCache(),
+		fileCache:  sync.Map{},
+		callerSkip: 0,
+		fullPath:   false,
 	}
 }

@@ -8,7 +8,9 @@ import (
 )
 
 func main() {
-	l := logger.NewLogger(logger.DEBUG, os.Stdout, false, false)
+
+	engine := logger.NewEngine(logger.DEBUG, logger.DefaultTextEncoder(), os.Stdout)
+	l := logger.NewLogger(engine)
 	i := 0
 	for {
 		l.Info("logger loop started")

@@ -8,7 +8,7 @@ type Encoder interface {
 
 type textEncoder struct{}
 
-func defaultTextEncoder() Encoder { return &textEncoder{} }
+func DefaultTextEncoder() Encoder { return &textEncoder{} }
 
 func (t *textEncoder) Encode(e *Entry, buf *fastBuffer) {
 	buf.AppendString(e.Level.String())

@@ -25,7 +25,7 @@ func newEntry(level LogLevel, msg string, fields []Field, file string, line int)
 }
 
 func (l *Logger) writeEntry(e *Entry) {
-	if e.Level < l.minLevel {
+	if e.Level < l.engine.level {
 		return
 	}
 
@@ -35,7 +35,7 @@ func (l *Logger) writeEntry(e *Entry) {
 	buf.Append(l.tsCache.Bytes())
 	buf.AppendByte(' ')
 
-	l.encoder.Encode(e, buf)
+	l.engine.enc.Encode(e, buf)
 
 	_, _ = l.out.Write(buf.Bytes())
 
