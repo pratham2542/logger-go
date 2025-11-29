@@ -14,6 +14,7 @@ type Logger struct {
 	bufPool    sync.Pool
 	tsCache    *timestampCache
 	fileCache  sync.Map // cache for base filenames
+	encoder    Encoder
 }
 
 // Synchronous logger
@@ -25,7 +26,7 @@ func NewLogger(level LogLevel, out io.Writer, fullPath, withCaller bool) *Logger
 		minLevel:   level,
 		fullPath:   fullPath,
 		withCaller: withCaller,
-		out:        &lockedWriter{w: out}, // lockeedWrite will make sure that no writes are getting intertwined
+		out:        &lockedWriter{w: out}, // lockedWriter will make sure that no writes are getting intertwined
 		bufPool: sync.Pool{
 			New: func() any {
 				// This is the only buffer creation
@@ -38,5 +39,6 @@ func NewLogger(level LogLevel, out io.Writer, fullPath, withCaller bool) *Logger
 		},
 		tsCache:   newTimestampCache(),
 		fileCache: sync.Map{},
+		encoder:   defaultTextEncoder(),
 	}
 }

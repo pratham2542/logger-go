@@ -25,3 +25,24 @@ func Int(key string, val int) Field       { return Field{Key: key, Type: IntType
 func Float(key string, val float64) Field { return Field{Key: key, Type: FloatType, Float: val} }
 func Bool(key string, val bool) Field     { return Field{Key: key, Type: BoolType, Bool: val} }
 func Error(key string, err error) Field   { return Field{Key: key, Type: ErrorType, Err: err} }
+
+func (f Field) AppendValueTo(buf *fastBuffer) {
+	switch f.Type {
+	case StringType:
+		buf.AppendString(f.Str)
+	case IntType:
+		buf.AppendInt(int(f.Int))
+	case FloatType:
+		buf.AppendFloat(f.Float)
+	case BoolType:
+		buf.AppendBool(f.Bool)
+	case ErrorType:
+		if f.Err != nil {
+			buf.AppendString(f.Err.Error())
+		} else {
+			buf.AppendString("<nil>")
+		}
+	default:
+		buf.AppendString("<unknown>")
+	}
+}

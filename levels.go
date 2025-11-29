@@ -10,11 +10,14 @@ const (
 	FATAL
 )
 
-// Infered length array for fixed compile time Log levels
-var levelNames = [...]string{
-	"DEBUG",
-	"INFO",
-	"WARN",
-	"ERROR",
-	"FATAL",
+var levelNames = map[LogLevel]string{
+	DEBUG: "DEBUG",
+	INFO:  "INFO",
+	WARN:  "WARN",
+	ERROR: "ERROR",
+	FATAL: "FATAL",
+}
+
+func (l LogLevel) String() string {
+	return levelNames[l]
 }

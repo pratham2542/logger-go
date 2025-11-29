@@ -1,6 +1,9 @@
 package logger
 
-import "sync"
+import (
+	"strconv"
+	"sync"
+)
 
 type fastBuffer struct {
 	b []byte
@@ -14,17 +17,35 @@ func (fb *fastBuffer) Bytes() []byte {
 	return fb.b
 }
 
-func (fb *fastBuffer) Write(p []byte) (int, error) {
+func (fb *fastBuffer) Append(p []byte) (int, error) {
 	fb.b = append(fb.b, p...)
 	return len(p), nil
 }
 
-func (fb *fastBuffer) WriteString(s string) (int, error) {
+func (fb *fastBuffer) AppendString(s string) (int, error) {
 	fb.b = append(fb.b, s...)
 	return len(s), nil
 }
 
-func (fb *fastBuffer) WriteByte(c byte) error {
+func (fb *fastBuffer) AppendInt(i int) (int, error) {
+	old := len(fb.b)
+	fb.b = strconv.AppendInt(fb.b, int64(i), 10)
+	return len(fb.b) - old, nil
+}
+
+func (fb *fastBuffer) AppendFloat(f float64) (int, error) {
+	old := len(fb.b)
+	fb.b = strconv.AppendFloat(fb.b, f, 'g', -1, 64)
+	return len(fb.b) - old, nil
+}
+
+func (fb *fastBuffer) AppendBool(v bool) (int, error) {
+	old := len(fb.b)
+	fb.b = strconv.AppendBool(fb.b, v)
+	return len(fb.b) - old, nil
+}
+
+func (fb *fastBuffer) AppendByte(c byte) error {
 	fb.b = append(fb.b, c)
 	return nil
 }
