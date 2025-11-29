@@ -11,8 +11,6 @@ type textEncoder struct{}
 func defaultTextEncoder() Encoder { return &textEncoder{} }
 
 func (t *textEncoder) Encode(e *Entry, buf *fastBuffer) {
-	buf.AppendString(e.Time.Format("2006-01-02 15:04:05"))
-	buf.AppendByte(' ')
 	buf.AppendString(e.Level.String())
 	buf.AppendByte(' ')
 	buf.AppendString(e.Msg)

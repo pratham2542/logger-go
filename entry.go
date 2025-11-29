@@ -32,6 +32,9 @@ func (l *Logger) writeEntry(e *Entry) {
 	buf := l.bufPool.Get().(*fastBuffer)
 	buf.Reset()
 
+	buf.Append(l.tsCache.Bytes())
+	buf.AppendByte(' ')
+
 	l.encoder.Encode(e, buf)
 
 	_, _ = l.out.Write(buf.Bytes())
