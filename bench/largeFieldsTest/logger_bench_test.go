@@ -6,17 +6,18 @@ import (
 	"testing"
 
 	"github.com/pratham2542/logger-go"
+	eng "github.com/pratham2542/logger-go/engine"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
 func BenchmarkCustomLogger70Fields(b *testing.B) {
-	engine := logger.NewEngine(logger.DEBUG, logger.DefaultTextEncoder(), io.Discard)
+	engine := eng.NewEngine(eng.DEBUG, eng.DefaultTextEncoder(), io.Discard)
 	l := logger.NewLogger(engine)
 
-	fields := make([]logger.Field, 0, 70000)
+	fields := make([]eng.Field, 0, 70000)
 	for i := 0; i < 70000; i++ {
-		fields = append(fields, logger.Int(fmt.Sprintf("k%d", i), i))
+		fields = append(fields, eng.Int(fmt.Sprintf("k%d", i), i))
 	}
 
 	b.ResetTimer()

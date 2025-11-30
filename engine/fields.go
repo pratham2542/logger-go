@@ -1,4 +1,6 @@
-package logger
+package engine
+
+import fastBuffer "github.com/pratham2542/logger-go/buffer"
 
 type fieldType int
 
@@ -26,7 +28,7 @@ func Float(key string, val float64) Field { return Field{Key: key, Type: FloatTy
 func Bool(key string, val bool) Field     { return Field{Key: key, Type: BoolType, Bool: val} }
 func Error(key string, err error) Field   { return Field{Key: key, Type: ErrorType, Err: err} }
 
-func (f Field) AppendValueTo(buf *fastBuffer) {
+func (f Field) AppendValueTo(buf *fastBuffer.FastBuffer) {
 	switch f.Type {
 	case StringType:
 		buf.AppendString(f.Str)

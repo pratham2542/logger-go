@@ -11,6 +11,13 @@ type lockedWriter struct {
 	w  io.Writer
 }
 
+func NewLockedWriter(w io.Writer) *lockedWriter {
+	return &lockedWriter{
+		w:  w,
+		mu: sync.Mutex{},
+	}
+}
+
 func (lw *lockedWriter) Write(p []byte) (int, error) {
 	lw.mu.Lock()
 	defer lw.mu.Unlock()

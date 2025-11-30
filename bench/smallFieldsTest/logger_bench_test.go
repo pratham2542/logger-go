@@ -5,12 +5,13 @@ import (
 	"testing"
 
 	"github.com/pratham2542/logger-go"
+	eng "github.com/pratham2542/logger-go/engine"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
 func BenchmarkCustomLogger(b *testing.B) {
-	engine := logger.NewEngine(logger.DEBUG, logger.DefaultTextEncoder(), io.Discard)
+	engine := eng.NewEngine(eng.DEBUG, eng.DefaultTextEncoder(), io.Discard)
 	l := logger.NewLogger(engine)
 
 	b.ResetTimer()
@@ -18,9 +19,9 @@ func BenchmarkCustomLogger(b *testing.B) {
 		for pb.Next() {
 			for range 100 {
 				l.Info("Benchmarking custom logger",
-					logger.Int("i", 42),
-					logger.Bool("ok", true),
-					logger.Float("f", 3.1415),
+					eng.Int("i", 42),
+					eng.Bool("ok", true),
+					eng.Float("f", 3.1415),
 				)
 			}
 		}
